@@ -23,7 +23,7 @@ class AuthView:
     def login(self, data: Login) -> Token:
         return self.auth_services.login(data.username, data.password)
 
-    @auth_router.post("/refresh", response_model=Token)
+    @auth_router.get("/refresh", response_model=Token)
     def refresh(self, token: str) -> Token:
         return self.auth_services.refresh_token(token)
 
