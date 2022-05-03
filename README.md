@@ -14,11 +14,12 @@
 
 ### Users Endpoints
 
-| Endpoint | Method | Description                    | Is Done |
-| -------- | :----: | ------------------------------ | :-----: |
-| /me      |  GET   | Get authenticated users detail |  False  |
-| /users   |  GET   | Register a user account        |  False  |
-| /users   |  PUT   | Update user details            |  False  |
+| Endpoint    | Method | Description                    | Is Done |
+| ----------- | :----: | ------------------------------ | :-----: |
+| /me         |  GET   | Get authenticated users detail |  True   |
+| /users      |  GET   | Get all users                  |  True   |
+| /users/{id} |  GET   | Get user with id               |  True   |
+| /users      |  PUT   | Update user details            |  True   |
 
 ### Tags Endpoints
 

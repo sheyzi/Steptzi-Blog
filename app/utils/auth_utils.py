@@ -51,9 +51,6 @@ class AuthUtils:
 
     def verify_access_token(self, token: str) -> User:
         try:
-            if self.auth_repository.get_used_token(token) is not None:
-                raise HTTPException(status_code=400, detail="Token already used")
-
             payload = jwt.decode(
                 token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
             )
@@ -65,7 +62,6 @@ class AuthUtils:
             if user is None:
                 raise JWTError()
 
-            self.auth_repository.add_used_token(token)
             return user
 
         except JWTError as e:

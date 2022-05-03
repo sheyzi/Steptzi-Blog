@@ -32,6 +32,23 @@ class UserCreate(UserBase):
         }
 
 
+class UserUpdate(UserBase):
+    """
+    The input class for updating user models.
+    """
+
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "username": "username",
+                "email": "me@steptzi.com.ng",
+            }
+        }
+
+
 class User(UserBase, table=True):
     """
     The user model.

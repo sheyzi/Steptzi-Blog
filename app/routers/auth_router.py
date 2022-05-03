@@ -65,7 +65,7 @@ class AuthView:
         return {"message": "Verification email sent"}
 
     @auth_router.get("/email-verify/confirm")
-    def verify_email(self, token: str) -> UserRead:
+    def verify_email(self, token: str):
         """
         Verify email address
         """

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from fastapi import HTTPException, status, Depends
 from sqlmodel import Session
 
@@ -55,10 +55,21 @@ class UserRepository:
         db_user = self.db.query(User).filter(User.email == email).first()
         return db_user
 
-    def get_all(self) -> List[User]:
-        return self.db.query(User).all()
+    def get_all(
+        self,
+        skip: Optional[int] = 0,
+        limit: Optional[int] = 100,
+        search: Optional[str] = None,
+    ) -> List[User]:
+        query = self.db.query(User)
+        if search:
+            query = query.filter(User.username.contains(search))
+        query = query.limit(limit).offset(skip)
+
+        return query.all()
 
     def update(self, user_id: int, user: UserCreate) -> User:
+
         db_user = self.get(user_id)
         for key, value in user.dict(exclude_unset=True).items():
             setattr(db_user, key, value)
