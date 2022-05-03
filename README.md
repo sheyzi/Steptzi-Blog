@@ -7,8 +7,8 @@
 | /auth/login                  |  POST  | Get access and refresh token                |  True   |
 | /auth/register               |  POST  | Register a user account                     |  True   |
 | /auth/refresh                |  GET   | Get a new pair of access and refresh tokens |  True   |
-| /auth/reset-password         |  POST  | Send reset password mail                    |  False  |
-| /auth/reset-password/confirm |  POST  | Confirm and reset password                  |  False  |
+| /auth/reset-password         |  POST  | Send reset password mail                    |  True   |
+| /auth/reset-password/confirm |  POST  | Confirm and reset password                  |  True   |
 | /auth/email-verify           |  POST  | Send user email verification mail           |  True   |
 | /auth/email-verify/confirm   |  GET   | Verify user email                           |  True   |
 

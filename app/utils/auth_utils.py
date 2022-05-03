@@ -107,7 +107,18 @@ class AuthUtils:
 
         return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
-    def verify_email(self, token: str):
+    def encode_reset_password_token(self, user_id) -> str:
+        payload = {
+            "sub": str(user_id),
+            "iat": datetime.utcnow(),
+            "exp": datetime.utcnow()
+            + timedelta(days=settings.EMAIL_TOKEN_EXPIRE_MINUTES),
+            "scope": "reset_password",
+        }
+
+        return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+    def verify_email(self, token: str) -> User:
         try:
             if self.auth_repository.get_used_token(token) is not None:
                 raise HTTPException(status_code=400, detail="Token already used")
@@ -123,6 +134,27 @@ class AuthUtils:
             self.auth_repository.add_used_token(token)
             return user
         except JWTError as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Can't validate credentials",
+            )
+
+    def verify_password_reset_token(self, token: str) -> User:
+        try:
+            if self.auth_repository.get_used_token(token) is not None:
+                raise HTTPException(status_code=400, detail="Token already used")
+            payload = jwt.decode(
+                token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            )
+            if payload["scope"] != "reset_password":
+                raise JWTError()
+            user_id = int(payload["sub"])
+            user = self.user_repository.get_or_none(user_id)
+            if user is None:
+                raise JWTError()
+            self.auth_repository.add_used_token(token)
+            return user
+        except JWTError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Can't validate credentials",

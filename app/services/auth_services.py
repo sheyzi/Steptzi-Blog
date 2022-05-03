@@ -1,6 +1,6 @@
 from fastapi import BackgroundTasks, HTTPException, status, Depends, Request
 
-from app.schemas import Token
+from app.schemas import Token, ResetPassword
 from app.utils.auth_utils import AuthUtils
 from app.repositories import UserRepository, user_repository
 from config.mail import send_email, EmailSchema
@@ -78,6 +78,15 @@ class AuthServices:
         )
         return verification_link
 
+    def generate_reset_password_link(self, request: Request, user_id: int):
+        reset_password_token = self.auth_utils.encode_reset_password_token(
+            user_id=user_id
+        )
+        base_url = request.base_url
+        frontend_url = settings.FRONTEND_URL
+        reset_password_link = f"{frontend_url or base_url}auth/reset-password/confirm?token={reset_password_token}"
+        return reset_password_link
+
     def send_verification_mail(
         self, background_tasks: BackgroundTasks, email: str, request: Request
     ):
@@ -94,6 +103,22 @@ class AuthServices:
             template_name="email_verification.html",
         )
 
+    def send_reset_password_mail(
+        self, background_tasks: BackgroundTasks, email: str, request: Request
+    ):
+        user = self.user_repository.get_by_email(email)
+        reset_password_link = self.generate_reset_password_link(request, user.id)
+        email = EmailSchema(
+            emails=[user.email],
+            body={"reset_password_link": reset_password_link},
+        )
+        send_email(
+            background_tasks,
+            subject=f"{settings.PROJECT_TITLE} password reset",
+            email=email,
+            template_name="reset_password.html",
+        )
+
     def verify_email(self, token: str) -> User:
         user = self.auth_utils.verify_email(token)
         if user.is_verified:
@@ -102,5 +127,16 @@ class AuthServices:
                 detail="This user is already verified",
             )
         user.is_verified = True
+        user = self.user_repository.update(user.id, user)
+        return user
+
+    def reset_password(self, token: str, reset_password: ResetPassword):
+        if reset_password.password != reset_password.confirm_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The passwords do not match",
+            )
+        user = self.auth_utils.verify_password_reset_token(token)
+        user.password = self.auth_utils.get_password_hash(reset_password.password)
         user = self.user_repository.update(user.id, user)
         return user

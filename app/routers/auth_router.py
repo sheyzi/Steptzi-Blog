@@ -3,6 +3,7 @@ from fastapi_utils.inferring_router import InferringRouter
 from fastapi_utils.cbv import cbv
 
 from app.schemas import Token, Login
+from app.schemas.auth_schemas import ResetPassword
 from app.services import AuthServices
 from config.dependencies import get_active_user
 from database.models.users import UserCreate, UserRead
@@ -63,10 +64,28 @@ class AuthView:
         )
         return {"message": "Verification email sent"}
 
-    @auth_router.get("/email-verify/confirm", response_model=UserRead)
+    @auth_router.get("/email-verify/confirm")
     def verify_email(self, token: str) -> UserRead:
         """
         Verify email address
         """
         user = self.auth_services.verify_email(token)
-        return user
+        return {"message": "Email verified"}
+
+    @auth_router.get("/reset-password")
+    def reset_password(self, email: str):
+        """
+        Send reset password email
+        """
+        self.auth_services.send_reset_password_mail(
+            self.background_tasks, email, self.request
+        )
+        return {"message": "Reset password email sent"}
+
+    @auth_router.post("/reset-password/confirm")
+    def confirm_reset_password(self, token: str, data: ResetPassword):
+        """
+        Confirm reset password
+        """
+        user = self.auth_services.reset_password(token, data)
+        return {"message": "Password reset"}

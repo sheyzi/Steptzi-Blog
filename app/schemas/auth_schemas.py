@@ -7,6 +7,11 @@ class Token(BaseModel):
     refresh_token: str
 
 
+class ResetPassword(BaseModel):
+    password: str
+    confirm_password: str
+
+
 class Login(BaseModel):
     username: str
     password: str
