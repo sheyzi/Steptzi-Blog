@@ -25,11 +25,11 @@
 
 | Endpoint     | Method | Description            | Is Done |
 | ------------ | :----: | ---------------------- | :-----: |
-| /tags        |  POST  | Create a new tag       |  False  |
-| /tags        |  GET   | Get all tags           |  False  |
-| /tags/{slug} |  GET   | Get a tag with slug    |  False  |
-| /tags/{slug} |  PUT   | Update a tag with slug |  False  |
-| /tags/{slug} | DELETE | Delete a tag with slug |  False  |
+| /tags        |  POST  | Create a new tag       |  True   |
+| /tags        |  GET   | Get all tags           |  True   |
+| /tags/{slug} |  GET   | Get a tag with slug    |  True   |
+| /tags/{slug} |  PUT   | Update a tag with slug |  True   |
+| /tags/{slug} | DELETE | Delete a tag with slug |  True   |
 
 ### Posts Endpoints
 

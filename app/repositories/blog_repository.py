@@ -2,12 +2,12 @@ from datetime import datetime
 from typing import List, Optional, Union
 from fastapi import Depends, HTTPException, status
 
-from database.models import Tag
+from database.models import Tag, Post
 from database.session import Session, get_db
-from database.models.blog import TagCreate, TagUpdate
+from database.models.blog import TagCreate, TagUpdate, PostCreate, PostUpdate
 
 
-class BlogRepository:
+class TagRepository:
     def __init__(self, db: Session = Depends(get_db)):
         self.db = db
 
