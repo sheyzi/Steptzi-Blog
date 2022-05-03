@@ -1,8 +1,10 @@
-from fastapi import HTTPException, status, Depends
+from fastapi import BackgroundTasks, HTTPException, status, Depends, Request
 
 from app.schemas import Token
 from app.utils.auth_utils import AuthUtils
-from app.repositories import UserRepository
+from app.repositories import UserRepository, user_repository
+from config.mail import send_email, EmailSchema
+from config.settings import settings
 from database.models.users import User, UserCreate
 
 
@@ -66,3 +68,39 @@ class AuthServices:
             "access_token": access_token,
             "refresh_token": refresh_token,
         }
+
+    def generate_verification_link(self, request: Request, user_id: int):
+        email_token = self.auth_utils.encode_verification_token(user_id=user_id)
+        base_url = request.base_url
+        frontend_url = settings.FRONTEND_URL
+        verification_link = (
+            f"{frontend_url or base_url}auth/email-verify/confirm?token={email_token}"
+        )
+        return verification_link
+
+    def send_verification_mail(
+        self, background_tasks: BackgroundTasks, email: str, request: Request
+    ):
+        user = self.user_repository.get_by_email(email)
+        verification_link = self.generate_verification_link(request, user.id)
+        email = EmailSchema(
+            emails=[user.email],
+            body={"verification_link": verification_link},
+        )
+        send_email(
+            background_tasks,
+            subject=f"{settings.PROJECT_TITLE} email verification",
+            email=email,
+            template_name="email_verification.html",
+        )
+
+    def verify_email(self, token: str) -> User:
+        user = self.auth_utils.verify_email(token)
+        if user.is_verified:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This user is already verified",
+            )
+        user.is_verified = True
+        user = self.user_repository.update(user.id, user)
+        return user

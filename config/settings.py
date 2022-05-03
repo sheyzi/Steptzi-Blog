@@ -24,13 +24,16 @@ class Settings(BaseModel):
 
     # Security settings
     SECRET_KEY: str = config("SECRET_KEY")
+    ALGORITHM: str = config("ALGORITHM", default="HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = config(
         "ACCESS_TOKEN_EXPIRE_MINUTES", default=30, cast=int
     )
     REFRESH_TOKEN_EXPIRE_DAYS: int = config(
         "REFRESH_TOKEN_EXPIRE_DAYS", default=30, cast=int
     )
-    ALGORITHM: str = config("ALGORITHM", default="HS256")
+    EMAIL_TOKEN_EXPIRE_MINUTES: int = config(
+        "EMAIL_TOKEN_EXPIRE_MINUTES", default=30, cast=int
+    )
 
     # CORS settings
     CORS_ORIGINS: List[str] = [
@@ -44,13 +47,13 @@ class Settings(BaseModel):
     CORS_ALLOW_CREDENTIALS: bool = True
 
     # Email settings
-    # EMAIL_HOST: str = config("EMAIL_HOST")
-    # EMAIL_PORT: int = config("EMAIL_PORT", default=587, cast=int)
-    # EMAIL_HOST_USER: str = config("EMAIL_HOST_USER")
-    # EMAIL_HOST_PASSWORD: str = config("EMAIL_HOST_PASSWORD")
-    # EMAIL_USE_TLS: bool = config("EMAIL_USE_TLS", default=True, cast=bool)
-    # EMAIL_USE_SSL: bool = config("EMAIL_USE_SSL", default=False, cast=bool)
-    # EMAIL_SENDER: str = config("EMAIL_SENDER")
+    EMAIL_USERNAME: str = config("EMAIL_USERNAME")
+    EMAIL_PASSWORD: str = config("EMAIL_PASSWORD")
+    EMAIL_FROM: str = config("EMAIL_FROM")
+    EMAIL_PORT: str = config("EMAIL_PORT")
+    EMAIL_SERVER: str = config("EMAIL_SERVER")
+
+    FRONTEND_URL: str = config("FRONTEND_URL", default=None)
 
 
 settings = Settings()

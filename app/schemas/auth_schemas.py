@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from typing import Any, List, Dict
+from pydantic import BaseModel, EmailStr
 
 
 class Token(BaseModel):
@@ -17,3 +18,8 @@ class Login(BaseModel):
                 "password": "password",
             }
         }
+
+
+class EmailSchema(BaseModel):
+    emails: List[EmailStr]
+    body: Dict[str, Any]

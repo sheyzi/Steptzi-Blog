@@ -50,6 +50,7 @@ class UserRead(UserBase):
     The output class for user models.
     """
 
+    id: int
     is_active: bool
     is_verified: bool
     is_admin: bool

@@ -9,3 +9,4 @@ python-jose[cryptography]==3.3.0
 python-multipart==0.0.5
 passlib[bcrypt]==1.7.4
 email-validator==1.2.1
+fastapi-mail==1.0.8

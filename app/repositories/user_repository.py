@@ -11,6 +11,8 @@ class UserRepository:
         self.db = db
 
     def create(self, user: UserCreate) -> User:
+        user.email = user.email.lower()
+        user.username = user.username.lower()
         db_user = User(**user.dict())
         self.db.add(db_user)
         self.db.commit()

@@ -9,8 +9,8 @@
 | /auth/refresh                |  GET   | Get a new pair of access and refresh tokens |  True   |
 | /auth/reset-password         |  POST  | Send reset password mail                    |  False  |
 | /auth/reset-password/confirm |  POST  | Confirm and reset password                  |  False  |
-| /auth/email-verify           |  POST  | Send user email verification mail           |  False  |
-| /auth/email-verify/confirm   |  GET   | Verify user email                           |  False  |
+| /auth/email-verify           |  POST  | Send user email verification mail           |  True   |
+| /auth/email-verify/confirm   |  GET   | Verify user email                           |  True   |
 
 ### Users Endpoints
 
