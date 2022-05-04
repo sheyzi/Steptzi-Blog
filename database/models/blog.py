@@ -77,5 +77,24 @@ class Post(Base):
         return f"<Post(title='{self.title}')>"
 
 
+class Comment(Base):
+    __tablename__ = "comments"
+    id = Column(Integer, primary_key=True)
+    post_id = Column(Integer, ForeignKey("posts.id"))
+    author_id = Column(Integer, ForeignKey("users.id"))
+    parent_id = Column(Integer, ForeignKey("comments.id", ondelete="CASCADE"))
+    content = Column(Text)
+
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    post = relationship("Post", backref="comments")
+    author = relationship("User", backref="comments")
+    parent = relationship("Comment", remote_side=[id], backref="children")
+
+    def __repr__(self):
+        return f"<Comment(content='{self.content}')>"
+
+
 event.listen(Tag.title, "set", Tag.generate_slug)
 event.listen(Post.title, "set", Post.generate_slug)

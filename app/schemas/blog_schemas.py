@@ -178,6 +178,7 @@ class PostRead(PostBase):
     id: int
     slug: str
     author: "UserRead"
+    comments: List["CommentRead"]
     created_at: datetime
     updated_at: datetime
 
@@ -203,6 +204,24 @@ class PostRead(PostBase):
                     "created_at": "2020-01-01T00:00:00",
                     "updated_at": "2020-01-01T00:00:00",
                 },
+                "comments": [
+                    {
+                        "id": 1,
+                        "content": "This is a comment",
+                        "author": {
+                            "id": 1,
+                            "username": "sheyzi",
+                            "email": "gistkiosk@gmail.com",
+                            "is_active": True,
+                            "is_verified": True,
+                            "is_admin": False,
+                            "created_at": "2020-01-01T00:00:00",
+                            "updated_at": "2020-01-01T00:00:00",
+                        },
+                        "created_at": "2020-01-01T00:00:00",
+                        "updated_at": "2020-01-01T00:00:00",
+                    }
+                ],
                 "created_at": "2020-01-01T00:00:00",
                 "updated_at": "2020-01-01T00:00:00",
             }
@@ -253,8 +272,93 @@ class PostReadWithTags(PostRead):
         }
 
 
+class CommentBase(BaseModel):
+    """
+    Base class for Comment model
+    """
+
+    content: str
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "content": "This is a comment",
+            }
+        }
+
+
+class CommentCreate(CommentBase):
+    """
+    Model for creating a content
+    """
+
+    post_id: int
+    parent_id: Optional[int] = None
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "content": "This is a comment",
+                "post_id": 1,
+                "parent_id": 1,
+            }
+        }
+
+
+class CommentRead(CommentBase):
+    """
+    Model for reading a comment
+    """
+
+    id: int
+    author: "UserRead"
+    children: List["CommentRead"]
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+        schema_extra = {
+            "example": {
+                "id": 1,
+                "content": "This is a comment",
+                "author": {
+                    "id": 1,
+                    "username": "sheyzi",
+                    "email": "gistkiosk@gmail.com",
+                    "is_active": True,
+                    "is_verified": True,
+                    "is_admin": False,
+                    "created_at": "2020-01-01T00:00:00",
+                    "updated_at": "2020-01-01T00:00:00",
+                },
+                "children": [
+                    {
+                        "id": 1,
+                        "content": "This is a comment",
+                        "author": {
+                            "id": 1,
+                            "username": "sheyzi",
+                            "email": "gistkiosk@gmail.com",
+                            "is_active": True,
+                            "is_verified": True,
+                            "is_admin": False,
+                            "created_at": "2020-01-01T00:00:00",
+                            "updated_at": "2020-01-01T00:00:00",
+                        },
+                        "created_at": "2020-01-01T00:00:00",
+                        "updated_at": "2020-01-01T00:00:00",
+                    }
+                ],
+                "created_at": "2020-01-01T00:00:00",
+                "updated_at": "2020-01-01T00:00:00",
+            }
+        }
+
+
 from .user_schemas import UserRead
 
 PostRead.update_forward_refs()
 TagReadWithPosts.update_forward_refs()
 PostReadWithTags.update_forward_refs()
+CommentRead.update_forward_refs()

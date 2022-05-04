@@ -35,11 +35,11 @@
 
 | Endpoint      | Method | Description             | Is Done |
 | ------------- | :----: | ----------------------- | :-----: |
-| /posts        |  POST  | Create a new post       |  False  |
-| /posts        |  GET   | Get all posts           |  False  |
-| /posts/{slug} |  GET   | Get a post with slug    |  False  |
-| /posts/{slug} |  PUT   | Update a post with slug |  False  |
-| /posts/{slug} | DELETE | Delete a post with slug |  False  |
+| /posts        |  POST  | Create a new post       |  True   |
+| /posts        |  GET   | Get all posts           |  True   |
+| /posts/{slug} |  GET   | Get a post with slug    |  True   |
+| /posts/{slug} |  PUT   | Update a post with slug |  True   |
+| /posts/{slug} | DELETE | Delete a post with slug |  True   |
 
 ### Comment Endpoints
 

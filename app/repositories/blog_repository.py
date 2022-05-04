@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import List, Optional, Union
 from fastapi import Depends, HTTPException, status
+from app.schemas.blog_schemas import CommentCreate
 
-from database.models import Tag, Post
+from database.models import Tag, Post, Comment
 from database.session import Session, get_db
 from app.schemas import TagCreate, TagUpdate, PostCreate, PostUpdate
 
@@ -258,3 +259,102 @@ class PostRepository:
         self.db.delete(post)
         self.db.commit()
         return {"message": "Post deleted"}
+
+
+class CommentRepository:
+    def __init__(
+        self,
+        db: Session = Depends(get_db),
+        post_repository: PostRepository = Depends(PostRepository),
+    ) -> None:
+        self.db = db
+        self.post_repository = post_repository
+
+    def get_all(
+        self,
+        skip: Optional[int] = 0,
+        limit: Optional[int] = 100,
+        search: Optional[str] = None,
+    ) -> List[Comment]:
+        """
+        :param skip: Number of items to skip
+        :param limit: Max number of items to return
+        :param search: Search term
+        :return: List of comments
+
+        Returns all comments.
+        """
+        query = self.db.query(Comment).filter(Comment.parent_id == None)
+        if search:
+            query = query.filter(Comment.body.contains(search))
+        query = query.offset(skip).limit(limit)
+        return query.all()
+
+    def get(self, comment_id: int) -> Comment:
+        """
+        :param comment_id: ID of comment to return
+        :return: Comment object
+
+        Returns a comment by ID.
+        """
+        comment = self.db.query(Comment).get(comment_id)
+        if comment is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found"
+            )
+        return comment
+
+    def get_or_none(self, comment_id: int) -> Union[Comment, None]:
+        """
+        :param comment_id: ID of comment to return
+        :return: Comment object or None
+
+        Returns a comment by ID.
+        """
+        comment = self.db.query(Comment).get(comment_id)
+        return comment
+
+    def get_by_post_id(self, post_id: int) -> List[Comment]:
+        """
+        :param post_id: ID of post to return
+        :return: List of Comment objects
+
+        Returns all comments for a post.
+        """
+        post = self.post_repository.get(post_id)
+        comments = self.db.query(Comment).filter(Comment.post_id == post_id)
+        return comments.all()
+
+    def create(self, comment: CommentCreate, author_id: int) -> Comment:
+        """
+        :param comment: Comment object to create
+        :param author_id: ID of author to associate with comment
+        :return: Comment object
+
+        Creates a new comment.
+        """
+        if comment.parent_id:
+            parent = self.get_or_none(comment.parent_id)
+            if parent is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Parent comment not found",
+                )
+        post = self.post_repository.get(comment.post_id)
+        comment_in_db = Comment(**comment.dict())
+        comment_in_db.author_id = author_id
+        self.db.add(comment_in_db)
+        self.db.commit()
+        self.db.refresh(comment_in_db)
+        return comment_in_db
+
+    def delete(self, comment_id: int):
+        """
+        :param comment_id: ID of comment to delete
+
+        Deletes a comment.
+        """
+        comment = self.get(comment_id)
+        self.db.delete(comment)
+        self.db.commit()
+        return {"message": "Comment deleted"}

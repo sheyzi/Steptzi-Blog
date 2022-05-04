@@ -8,5 +8,7 @@ from .blog_schemas import (
     TagUpdate,
     TagRead,
     TagReadWithPosts,
+    CommentRead,
+    CommentCreate,
 )
 from .user_schemas import UserCreate, UserRead, UserReadWithPosts, UserUpdate

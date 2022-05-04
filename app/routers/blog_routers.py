@@ -3,11 +3,15 @@ from typing import List
 from fastapi import Depends, Query, HTTPException, status
 from fastapi_utils.inferring_router import InferringRouter
 from fastapi_utils.cbv import cbv
-from app.repositories.blog_repository import PostRepository
-from app.schemas.blog_schemas import PostReadWithTags, PostUpdate
+from app.schemas.blog_schemas import (
+    CommentCreate,
+    CommentRead,
+    PostReadWithTags,
+    PostUpdate,
+)
 
 from app.services import TagService
-from app.services.blog_services import PostService
+from app.services.blog_services import PostService, CommentService
 from app.schemas import (
     PostCreate,
     PostRead,
@@ -72,8 +76,13 @@ class TagRouter:
 
 @cbv(blog_router)
 class PostRouter:
-    def __init__(self, post_service: PostService = Depends(PostService)) -> None:
+    def __init__(
+        self,
+        post_service: PostService = Depends(PostService),
+        comment_service: CommentService = Depends(CommentService),
+    ) -> None:
         self.post_service = post_service
+        self.comment_service = comment_service
 
     @blog_router.post("/posts", response_model=PostRead)
     def create_posts(
@@ -135,3 +144,57 @@ class PostRouter:
                 detail="You can only delete your own posts",
             )
         return self.post_service.delete(slug)
+
+
+@cbv(blog_router)
+class CommentRouter:
+    def __init__(
+        self, comment_service: CommentService = Depends(CommentService)
+    ) -> None:
+        self.comment_service = comment_service
+
+    @blog_router.post("/comments", response_model=CommentRead)
+    def create_comments(
+        self,
+        comment: CommentCreate,
+        current_user: UserRead = Depends(get_active_user),
+    ) -> CommentRead:
+        """
+        Create a new comment
+        """
+        return self.comment_service.create(comment, current_user.id)
+
+    @blog_router.get("/comments", response_model=List[CommentRead])
+    def get_all_comments(
+        self,
+        skip: int = 0,
+        limit: int = Query(100, le=100),
+        search: str = None,
+        admin_user: UserRead = Depends(get_admin_user),
+    ) -> List[CommentRead]:
+        """
+        Get all comments
+        """
+        return self.comment_service.get_all(skip, limit, search)
+
+    @blog_router.get("/comments/{id}", response_model=CommentRead)
+    def get_comment_by_id(
+        self, id: int, admin_user: UserRead = Depends(get_admin_user)
+    ) -> CommentRead:
+        """
+        Get a comment by id
+        """
+        return self.comment_service.get(id)
+
+    @blog_router.delete("/comments/{id}")
+    def delete_comment(self, id: int, active_user: UserRead = Depends(get_active_user)):
+        """
+        Delete a comment
+        """
+        comment_in_db = self.comment_service.get(id)
+        if active_user.id != comment_in_db.author_id and not active_user.is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You can only delete your own comments",
+            )
+        return self.comment_service.delete(id)
