@@ -76,7 +76,7 @@ class PostRouter:
         self.post_service = post_service
 
     @blog_router.post("/posts", response_model=PostRead)
-    def create(
+    def create_posts(
         self, post: PostCreate, current_user: UserRead = Depends(get_active_user)
     ) -> PostRead:
         """
@@ -85,7 +85,7 @@ class PostRouter:
         return self.post_service.create(post, current_user.id)
 
     @blog_router.put("/posts/{slug}", response_model=PostRead)
-    def update(
+    def update_posts(
         self,
         post: PostUpdate,
         slug: str,
@@ -103,7 +103,7 @@ class PostRouter:
         return self.post_service.update(post, slug)
 
     @blog_router.get("/posts", response_model=List[PostRead])
-    def get_all(
+    def get_all_posts(
         self,
         skip: int = 0,
         limit: int = Query(100, le=100),
@@ -115,14 +115,16 @@ class PostRouter:
         return self.post_service.get_all(skip, limit, search)
 
     @blog_router.get("/posts/{slug}", response_model=PostReadWithTags)
-    def get_by_slug(self, slug: str) -> PostReadWithTags:
+    def get_post_by_slug(self, slug: str) -> PostReadWithTags:
         """
         Get a post by slug
         """
         return self.post_service.get_by_slug(slug)
 
     @blog_router.delete("/posts/{slug}")
-    def delete(self, slug: str, get_active_user: UserRead = Depends(get_active_user)):
+    def delete_post(
+        self, slug: str, get_active_user: UserRead = Depends(get_active_user)
+    ):
         """
         Delete a post
         """
