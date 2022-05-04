@@ -19,7 +19,7 @@ class Login(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "username": "username",
+                "username": "sheyzi",
                 "password": "password",
             }
         }

@@ -1,12 +1,12 @@
 from typing import List, Optional
-from fastapi import BackgroundTasks, Depends, HTTPException, Query, Request, status
-from fastapi_utils.inferring_router import InferringRouter
-from fastapi_utils.cbv import cbv
 
-from app.services import UserServices
-from app.services import AuthServices
+from fastapi import BackgroundTasks, Depends, HTTPException, Query, Request, status
+from fastapi_utils.cbv import cbv
+from fastapi_utils.inferring_router import InferringRouter
+
+from app.services import UserService
 from config.dependencies import get_active_user, get_admin_user
-from database.models.users import UserCreate, UserRead, UserUpdate
+from app.schemas import UserCreate, UserRead, UserUpdate
 
 user_router = InferringRouter()
 
@@ -15,7 +15,7 @@ user_router = InferringRouter()
 class UserRouter:
     def __init__(
         self,
-        user_services: UserServices = Depends(UserServices),
+        user_services: UserService = Depends(UserService),
         background_tasks: BackgroundTasks = BackgroundTasks,
         request: Request = Request,
     ) -> None:
@@ -56,7 +56,7 @@ class UserRouter:
         """
         if user_id != current_user.id and not current_user.is_admin:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden"
             )
 
         return self.user_services.update_user(

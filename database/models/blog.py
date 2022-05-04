@@ -1,163 +1,81 @@
-from datetime import datetime
-from random import randint
-from pydantic import root_validator
-from sqlalchemy import Column, String
-from sqlmodel import Relationship, SQLModel, Field
-from typing import List, Optional
+import random
+from sqlalchemy import (
+    Boolean,
+    Column,
+    String,
+    Integer,
+    DateTime,
+    ForeignKey,
+    Table,
+    Text,
+    event,
+    func,
+)
+from sqlalchemy.orm import relationship
 from slugify import slugify
 
-from database.models.users import User
+from database.session import Base
 
 
-class TagBase(SQLModel):
-    """
-    Base class for Tag model
-    """
-
-    title: str
-    excerpt: Optional[str] = Field(nullable=True, default=None)
-    description: Optional[str] = Field(nullable=True, default=None)
-    cover_image: Optional[str] = Field(nullable=True, default=None)
+def get_slug(title):
+    return f"{slugify(title)}-{random.randint(100000, 999999)}"
 
 
-class TagCreate(TagBase):
-    """
-    Model for creating a tag
-    """
-
-    pass
-
-    class Config:
-
-        schema_extra = {
-            "example": {
-                "title": "Python",
-                "excerpt": "Python is a programming language",
-                "description": "Python is a programming language",
-                "cover_image": "https://www.python.org/static/opengraph-icon-200x200.png",
-            }
-        }
+TagPost = Table(
+    "tag_post",
+    Base.metadata,
+    Column("tag_id", Integer, ForeignKey("tags.id"), primary_key=True),
+    Column("post_id", Integer, ForeignKey("posts.id"), primary_key=True),
+)
 
 
-class TagUpdate(TagBase):
-    """
-    Model for updating a tag
-    """
-
-    title: Optional[str] = None
-    excerpt: Optional[str] = None
-    description: Optional[str] = None
-    cover_image: Optional[str] = None
-
-
-class Tag(TagBase, table=True):
-    """
-    Database representation for a tag
-    """
-
+class Tag(Base):
     __tablename__ = "tags"
-    id: Optional[int] = Field(default=None, nullable=True, primary_key=True)
-    slug: Optional[str] = Field(sa_column=Column(String, unique=True))
-    created_at: datetime = Field(default=datetime.utcnow(), nullable=False)
-    updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    id = Column(Integer, primary_key=True)
+    title = Column(String(255), unique=True)
+    slug = Column(String(255), unique=True, nullable=True)
+    excerpt = Column(String(500), nullable=True, default=None)
+    description = Column(Text, nullable=True, default=None)
+    cover_image = Column(String(500), nullable=True, default=None)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    @root_validator
-    def create_slug(cls, values):
-        title = values.get("title")
-        slugify_title = f"{slugify(title)}-{randint(100000, 999999)}"
-        values["slug"] = slugify_title
-        return values
+    posts = relationship("Post", secondary=TagPost, back_populates="tags")
 
-    class Config:
-        validate_assignment = True
+    @staticmethod
+    def generate_slug(target, value, oldvalue, initiator):
+        if value and (not target.slug):
+            target.slug = get_slug(value)
 
-
-class TagRead(TagBase):
-    """
-    Model for reading a tag
-    """
-
-    id: int
-    slug: str
-    created_at: datetime
-    updated_at: datetime
+    def __repr__(self):
+        return f"<Tag(name='{self.title}')>"
 
 
-class PostBase(SQLModel):
-    """
-    Base class for Post model
-    """
-
-    title: str
-    excerpt: Optional[str] = Field(nullable=True, default=None)
-    content: str
-    featured_image: Optional[str] = Field(nullable=True, default=None)
-    is_featured: Optional[bool] = Field(nullable=False, default=None)
-    is_published: Optional[bool] = Field(nullable=False, default=None)
-
-
-class PostCreate(PostBase):
-    """
-    Model for creating a post
-    """
-
-    class Config:
-
-        schema_extra = {
-            "example": {
-                "title": "Sample post",
-                "excerpt": "Sample post excerpt",
-                "content": "Sample post content",
-                "featured_image": "https://www.python.org/static/opengraph-icon-200x200.png",
-                "is_featured": False,
-                "is_published": True,
-            }
-        }
-
-
-class PostUpdate(PostBase):
-    """
-    Model for updating a post
-    """
-
-    title: Optional[str] = None
-    excerpt: Optional[str] = None
-    content: Optional[str] = None
-    featured_image: Optional[str] = None
-    is_featured: Optional[bool] = None
-    is_published: Optional[bool] = None
-
-
-class Post(PostBase, table=True):
-    """
-    Database representation for a post
-    """
-
+class Post(Base):
     __tablename__ = "posts"
-    id: Optional[int] = Field(default=None, nullable=True, primary_key=True)
-    author_id: int = Field(nullable=False, foreign_key="users.id")
-    slug: Optional[str] = Field(sa_column=Column(String, unique=True))
-    created_at: datetime = Field(default=datetime.utcnow(), nullable=False)
-    updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    id = Column(Integer, primary_key=True)
+    title = Column(String(255))
+    slug = Column(String(255), unique=True, nullable=True)
+    excerpt = Column(String(500), nullable=True, default=None)
+    content = Column(String(5000))
+    featured_image = Column(String(500), nullable=True, default=None)
+    is_featured = Column(Boolean, default=False)
+    is_published = Column(Boolean, default=False)
+    author_id = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    @root_validator
-    def create_slug(cls, values):
-        title = values.get("title")
-        slugify_title = f"{slugify(title)}-{randint(100000, 999999)}"
-        values["slug"] = slugify_title
-        return values
+    author = relationship("User", backref="posts")
+    tags = relationship("Tag", secondary=TagPost, back_populates="posts")
 
-    class Config:
-        validate_assignment = True
+    @staticmethod
+    def generate_slug(target, value, oldvalue, initiator):
+        if value and (not target.slug):
+            target.slug = get_slug(value)
+
+    def __repr__(self):
+        return f"<Post(title='{self.title}')>"
 
 
-class PostRead(PostBase):
-    """
-    Model for reading a post
-    """
-
-    id: int
-    author_id: int
-    slug: str
-    created_at: datetime
-    updated_at: datetime
+event.listen(Tag.title, "set", Tag.generate_slug)
+event.listen(Post.title, "set", Post.generate_slug)

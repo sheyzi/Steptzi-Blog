@@ -5,7 +5,8 @@ from app.utils.auth_utils import AuthUtils
 from app.repositories import UserRepository, user_repository
 from config.mail import send_email, EmailSchema
 from config.settings import settings
-from database.models.users import User, UserCreate
+from database.models import User
+from app.schemas import UserCreate
 
 
 class AuthServices:
@@ -126,6 +127,7 @@ class AuthServices:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="This user is already verified",
             )
+
         user.is_verified = True
         user = self.user_repository.update(user.id, user)
         return user

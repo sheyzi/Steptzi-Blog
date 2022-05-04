@@ -6,7 +6,7 @@ from app.schemas import Token, Login
 from app.schemas.auth_schemas import ResetPassword
 from app.services import AuthServices
 from config.dependencies import get_active_user
-from database.models.users import UserCreate, UserRead
+from app.schemas import UserCreate, UserRead
 
 auth_router = InferringRouter()
 

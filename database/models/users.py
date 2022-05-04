@@ -1,84 +1,27 @@
-from sqlmodel import SQLModel, Field
-from typing import List, Optional
-from sqlalchemy import Column, String
-from pydantic import EmailStr
+from database.session import Base
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    DateTime,
+    Boolean,
+    func,
+)
+from sqlalchemy.orm import relationship
 
 
-class UserBase(SQLModel):
-    """
-    The base class for user models.
-    """
-
-    username: str = Field(sa_column=Column(String, unique=True))
-    email: EmailStr = Field(sa_column=Column(String, unique=True))
-
-
-class UserCreate(UserBase):
-    """
-    The input class for user models.
-    """
-
-    password: str
-    confirm_password: str
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "username": "username",
-                "email": "me@steptzi.com.ng",
-                "password": "password",
-                "confirm_password": "password",
-            }
-        }
-
-
-class UserUpdate(UserBase):
-    """
-    The input class for updating user models.
-    """
-
-    username: Optional[str] = None
-    email: Optional[EmailStr] = None
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "username": "username",
-                "email": "me@steptzi.com.ng",
-            }
-        }
-
-
-class User(UserBase, table=True):
-    """
-    The user model.
-    """
-
+class User(Base):
     __tablename__ = "users"
-    id: Optional[int] = Field(default=None, nullable=True, primary_key=True)
-    password: str
-    is_active: Optional[bool] = Field(default=True)
-    is_verified: Optional[bool] = Field(default=False)
-    is_admin: Optional[bool] = Field(default=False)
 
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, index=True)
+    email = Column(String(120), unique=True, index=True)
+    password = Column(String(255))
+    is_active = Column(Boolean, default=True, nullable=True)
+    is_verified = Column(Boolean, default=False, nullable=True)
+    is_admin = Column(Boolean, default=False, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
 
-class UserRead(UserBase):
-    """
-    The output class for user models.
-    """
-
-    id: int
-    is_active: bool
-    is_verified: bool
-    is_admin: bool
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "username": "username",
-                "email": "me@steptzi.com.ng",
-                "is_active": True,
-                "is_verified": False,
-                "is_admin": False,
-            }
-        }
+    def __repr__(self):
+        return f"<User(username='{self.username}', email='{self.email}')>"

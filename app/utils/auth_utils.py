@@ -84,7 +84,7 @@ class AuthUtils:
             user = self.user_repository.get_or_none(user_id)
             if user is None:
                 raise JWTError()
-            self.add_used_token(token)
+            self.auth_repository.add_used_token(token)
             return user
         except JWTError as e:
             raise HTTPException(

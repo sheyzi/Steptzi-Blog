@@ -1,8 +1,11 @@
 from typing import List, Optional
 from fastapi import HTTPException, status, Depends
-from sqlmodel import Session
+from sqlalchemy.orm import Session
 
-from database.models.users import User, UserCreate
+from app.schemas import UserCreate
+from app.schemas.user_schemas import UserUpdate
+from app.utils.database_utils import sanitize_sqlalchemy_or_pydantic
+from database.models import User
 from database.session import get_db
 
 
@@ -13,7 +16,7 @@ class UserRepository:
     def create(self, user: UserCreate) -> User:
         user.email = user.email.lower()
         user.username = user.username.lower()
-        db_user = User(**user.dict())
+        db_user = User(**user.dict(exclude={"confirm_password"}))
         self.db.add(db_user)
         self.db.commit()
         self.db.refresh(db_user)
@@ -68,10 +71,11 @@ class UserRepository:
 
         return query.all()
 
-    def update(self, user_id: int, user: UserCreate) -> User:
+    def update(self, user_id: int, user: UserUpdate) -> User:
 
         db_user = self.get(user_id)
-        for key, value in user.dict(exclude_unset=True).items():
+        user = sanitize_sqlalchemy_or_pydantic(user)
+        for key, value in user.items():
             setattr(db_user, key, value)
         self.db.commit()
         self.db.refresh(db_user)

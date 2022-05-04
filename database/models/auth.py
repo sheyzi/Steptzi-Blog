@@ -1,9 +1,8 @@
-from sqlmodel import Field, SQLModel
+from sqlalchemy import Column, String
+
+from database.session import Base
 
 
-class UsedTokens(SQLModel, table=True):
-    """
-    Model for used tokens
-    """
-
-    id: str = Field(primary_key=True)
+class UsedTokens(Base):
+    __tablename__ = "used_tokens"
+    id = Column(String(500), primary_key=True)
