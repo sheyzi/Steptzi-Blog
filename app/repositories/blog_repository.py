@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List, Optional, Union
 from fastapi import Depends, HTTPException, status
+from sqlalchemy import desc
 from app.schemas.blog_schemas import CommentCreate
 
 from database.models import Tag, Post, Comment
@@ -30,7 +31,7 @@ class TagRepository:
         if search:
             query = query.filter(Tag.title.contains(search))
         query = query.offset(skip).limit(limit)
-        return query.all()
+        return query.order_by(desc(Tag.created_at)).all()
 
     def get(self, tag_id: int) -> Tag:
         """
@@ -148,7 +149,7 @@ class PostRepository:
         if search:
             query = query.filter(Post.title.contains(search))
         query = query.offset(skip).limit(limit)
-        return query.all()
+        return query.order_by(desc(Post.updated_at)).all()
 
     def get(self, post_id: int) -> Post:
         """
@@ -288,7 +289,7 @@ class CommentRepository:
         if search:
             query = query.filter(Comment.body.contains(search))
         query = query.offset(skip).limit(limit)
-        return query.all()
+        return query.order_by(desc(Comment.created_at)).all()
 
     def get(self, comment_id: int) -> Comment:
         """
@@ -323,7 +324,7 @@ class CommentRepository:
         """
         post = self.post_repository.get(post_id)
         comments = self.db.query(Comment).filter(Comment.post_id == post_id)
-        return comments.all()
+        return comments.order_by(desc(Comment.created_at)).all()
 
     def create(self, comment: CommentCreate, author_id: int) -> Comment:
         """
