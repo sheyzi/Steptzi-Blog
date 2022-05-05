@@ -39,7 +39,8 @@ class Settings(BaseModel):
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
         "localhost:3000",
-        "steptzi.com.ng" "https://steptzi.com.ng",
+        "steptzi.com.ng",
+        "https://steptzi.com.ng",
         "https://www.steptzi.com.ng",
     ]
     CORS_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
