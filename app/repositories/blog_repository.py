@@ -27,11 +27,11 @@ class TagRepository:
 
         Returns all tags.
         """
-        query = self.db.query(Tag)
+        query = self.db.query(Tag).order_by(desc(Tag.created_at))
         if search:
             query = query.filter(Tag.title.contains(search))
         query = query.offset(skip).limit(limit)
-        return query.order_by(desc(Tag.created_at)).all()
+        return query.all()
 
     def get(self, tag_id: int) -> Tag:
         """
@@ -145,11 +145,11 @@ class PostRepository:
 
         Returns all posts.
         """
-        query = self.db.query(Post)
+        query = self.db.query(Post).order_by(desc(Post.updated_at))
         if search:
             query = query.filter(Post.title.contains(search))
         query = query.offset(skip).limit(limit)
-        return query.order_by(desc(Post.updated_at)).all()
+        return query.all()
 
     def get(self, post_id: int) -> Post:
         """
@@ -285,11 +285,15 @@ class CommentRepository:
 
         Returns all comments.
         """
-        query = self.db.query(Comment).filter(Comment.parent_id == None)
+        query = (
+            self.db.query(Comment)
+            .order_by(desc(Comment.created_at))
+            .filter(Comment.parent_id == None)
+        )
         if search:
             query = query.filter(Comment.body.contains(search))
         query = query.offset(skip).limit(limit)
-        return query.order_by(desc(Comment.created_at)).all()
+        return query.all()
 
     def get(self, comment_id: int) -> Comment:
         """
@@ -323,8 +327,12 @@ class CommentRepository:
         Returns all comments for a post.
         """
         post = self.post_repository.get(post_id)
-        comments = self.db.query(Comment).filter(Comment.post_id == post_id)
-        return comments.order_by(desc(Comment.created_at)).all()
+        comments = (
+            self.db.query(Comment)
+            .order_by(desc(Comment.created_at))
+            .filter(Comment.post_id == post_id)
+        )
+        return comments.all()
 
     def create(self, comment: CommentCreate, author_id: int) -> Comment:
         """
