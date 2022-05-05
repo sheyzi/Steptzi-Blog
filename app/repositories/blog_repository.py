@@ -29,7 +29,7 @@ class TagRepository:
         """
         query = self.db.query(Tag).order_by(desc(Tag.created_at))
         if search:
-            query = query.filter(Tag.title.like(search))
+            query = query.filter(Tag.title.like(f"%{search}%"))
         query = query.offset(skip).limit(limit)
         return query.all()
 
@@ -147,7 +147,7 @@ class PostRepository:
         """
         query = self.db.query(Post).order_by(desc(Post.updated_at))
         if search:
-            query = query.filter(Post.title.like(search))
+            query = query.filter(Post.title.ilike(f"%{search}%"))
         query = query.offset(skip).limit(limit)
         return query.all()
 
@@ -291,7 +291,7 @@ class CommentRepository:
             .filter(Comment.parent_id == None)
         )
         if search:
-            query = query.filter(Comment.body.like(search))
+            query = query.filter(Comment.body.ilike(f"%{search}%"))
         query = query.offset(skip).limit(limit)
         return query.all()
 
