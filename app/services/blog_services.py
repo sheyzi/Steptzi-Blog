@@ -111,6 +111,20 @@ class PostService:
         post = self.post_repository.get_by_slug(slug)
         return post
 
+    def get_featured(
+        self, skip: Optional[int] = 0, limit: Optional[int] = 100
+    ) -> List[Post]:
+        """
+        :param skip: Number of items to skip
+        :param limit: Max number of items to return
+        :return: List of posts
+
+        Returns all featured posts.
+        """
+        query = self.post_repository.get_all(skip, limit)
+        query = [post for post in query if post.is_featured]
+        return query
+
     def create(self, post: PostCreate, author_id: int) -> Post:
         """
         :param post: Post object

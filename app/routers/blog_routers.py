@@ -123,6 +123,17 @@ class PostRouter:
         """
         return self.post_service.get_all(skip, limit, search)
 
+    @blog_router.get("/posts/featured", response_model=List[PostRead])
+    def get_featured_posts(
+        self,
+        skip: int = 0,
+        limit: int = Query(100, le=100),
+    ) -> List[PostRead]:
+        """
+        Get all featured posts
+        """
+        return self.post_service.get_featured(skip, limit)
+
     @blog_router.get("/posts/{slug}", response_model=PostReadWithTags)
     def get_post_by_slug(self, slug: str) -> PostReadWithTags:
         """

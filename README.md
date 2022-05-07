@@ -33,13 +33,14 @@
 
 ### Posts Endpoints
 
-| Endpoint      | Method | Description             | Is Done |
-| ------------- | :----: | ----------------------- | :-----: |
-| /posts        |  POST  | Create a new post       |  True   |
-| /posts        |  GET   | Get all posts           |  True   |
-| /posts/{slug} |  GET   | Get a post with slug    |  True   |
-| /posts/{slug} |  PUT   | Update a post with slug |  True   |
-| /posts/{slug} | DELETE | Delete a post with slug |  True   |
+| Endpoint        | Method | Description             | Is Done |
+| --------------- | :----: | ----------------------- | :-----: |
+| /posts          |  POST  | Create a new post       |  True   |
+| /posts          |  GET   | Get all posts           |  True   |
+| /posts/featured |  GET   | Get all featured posts  |  True   |
+| /posts/{slug}   |  GET   | Get a post with slug    |  True   |
+| /posts/{slug}   |  PUT   | Update a post with slug |  True   |
+| /posts/{slug}   | DELETE | Delete a post with slug |  True   |
 
 ### Comment Endpoints
 
