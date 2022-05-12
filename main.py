@@ -36,6 +36,6 @@ def startup():
     init_db()
 
 
-@app.get("/", include_in_schema=False)
+@app.get("/", include_in_schema=False, tags=["root"])
 def root():
     return RedirectResponse(url="/docs")
