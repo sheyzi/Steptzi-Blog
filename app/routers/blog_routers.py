@@ -33,7 +33,7 @@ class TagRouter:
         self.tag_service = tag_service
 
     @blog_router.post("/tags", response_model=TagRead)
-    def create(
+    def create_tag(
         self, tag: TagCreate, admin_user: UserRead = Depends(get_admin_user)
     ) -> TagRead:
         """
@@ -42,7 +42,7 @@ class TagRouter:
         return self.tag_service.create(tag)
 
     @blog_router.get("/tags", response_model=List[TagRead])
-    def get_all(
+    def get_all_tags(
         self, skip: int = 0, limit: int = Query(100, le=100), search: str = None
     ) -> List[TagRead]:
         """
@@ -51,14 +51,14 @@ class TagRouter:
         return self.tag_service.get_all(skip, limit, search)
 
     @blog_router.get("/tags/{slug}", response_model=TagReadWithPosts)
-    def get_by_slug(self, slug: str) -> TagRead:
+    def get_tags_by_slug(self, slug: str) -> TagRead:
         """
         Get a tag by slug
         """
         return self.tag_service.get_by_slug(slug)
 
     @blog_router.put("/tags/{slug}", response_model=TagRead)
-    def update(
+    def update_tags(
         self, tag: TagUpdate, slug: str, admin_user: UserRead = Depends(get_admin_user)
     ) -> TagRead:
         """
@@ -67,7 +67,7 @@ class TagRouter:
         return self.tag_service.update(tag, slug)
 
     @blog_router.delete("/tags/{slug}")
-    def delete(self, slug: str, admin_user: UserRead = Depends(get_admin_user)):
+    def delete_tags(self, slug: str, admin_user: UserRead = Depends(get_admin_user)):
         """
         Delete a tag
         """
